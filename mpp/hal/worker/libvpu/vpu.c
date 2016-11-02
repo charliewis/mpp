@@ -52,8 +52,8 @@ static RK_S32 vpu_service_status = -1;
 
 static const char *name_rkvdec = "/dev/rkvdec";
 static const char *name_rkvenc = "/dev/rkvenc";
-static const char *name_hevc_service = "/dev/hevc_service";
-static const char *name_vpu_service = "/dev/vpu_service";
+static const char *name_hevc_service = "/dev/hevc-service";
+static const char *name_vpu_service = "/dev/vpu-service";
 static const char *name_avsd = "/dev/avsd";
 static const char *name_vepu = "/dev/vepu";
 
