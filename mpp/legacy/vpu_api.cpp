@@ -208,7 +208,8 @@ public:
     VpulibDlsym() :
         rkapi_hdl(NULL),
         rkvpu_open_cxt(NULL),
-        rkvpu_close_cxt(NULL) {
+        rkvpu_close_cxt(NULL)
+    {
         RK_U32 i;
 
         for (i = 0; i < MPP_ARRAY_ELEMS(codec_paths); i++) {
@@ -226,7 +227,8 @@ public:
         }
     }
 
-    ~VpulibDlsym() {
+    ~VpulibDlsym()
+    {
         if (rkapi_hdl) {
             dlclose(rkapi_hdl);
             mpp_log("dlclose vpu lib");
@@ -317,7 +319,8 @@ RK_S32 vpu_open_context(VpuCodecContext **ctx)
     } else if (!!access("/dev/rkvdec", F_OK)) {
         /* if there is no rkvdec it means the platform must be vpu1 */
         if (s && s->videoCoding == OMX_RK_VIDEO_CodingHEVC &&
-            !access("/dev/hevc_service", F_OK)) {
+            !(access("/dev/hevc-service", F_OK)
+            || access("/dev/hevc_service", F_OK))) {
             /* if this is a hevc request and exist hevc_service for decoding use mpp */
             use_mpp = 1;
         } else {
