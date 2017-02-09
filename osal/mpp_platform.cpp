@@ -70,7 +70,8 @@ RK_U32 mpp_get_vcodec_hw_flag(void)
             close(fd);
         }
         /* for rk3288 / rk3368 /rk312x hevc decoder */
-        if (!access("/dev/hevc_service", F_OK)) {
+        if (!access("/dev/hevc_service", F_OK) ||
+            !access("/dev/hevc-service", F_OK) ) {
             flag |= HAVE_HEVC_DEC;
         }
         /* for rk3228 / rk3229 / rk3399 decoder */
