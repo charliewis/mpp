@@ -52,8 +52,10 @@ static RK_S32 vpu_service_status = -1;
 
 static const char *name_rkvdec = "/dev/rkvdec";
 static const char *name_rkvenc = "/dev/rkvenc";
-static const char *name_hevc_service = "/dev/hevc-service";
-static const char *name_vpu_service = "/dev/vpu-service";
+static const char *name_hevc_service = "/dev/hevc_service";
+static const char *name_hevc_service2 = "/dev/hevc-service";
+static const char *name_vpu_service = "/dev/vpu_service";
+static const char *name_vpu_service2 = "/dev/vpu-service";
 static const char *name_avsd = "/dev/avsd";
 static const char *name_vepu = "/dev/vepu";
 
@@ -63,6 +65,29 @@ static const char *determine_vepu_dev()
         return name_vepu;
     else
         return name_vpu_service;
+}
+
+static int open_decoder_dev(const char *path, VPU_CLIENT_TYPE type)
+{
+    int fd;
+    const char *new_path = NULL;
+
+    fd = open(path, O_RDWR);
+
+    if (fd != -1)
+        return fd;
+
+    /* Try again */
+    if (type == VPU_DEC_HEVC || type == VPU_DEC) {
+        if (type == VPU_DEC_HEVC)
+            new_path = name_hevc_service2;
+        if (type == VPU_DEC)
+            new_path = name_vpu_service2;
+
+        return open(new_path, O_RDWR);
+    }
+
+    return fd;
 }
 
 int VPUClientInit(VPU_CLIENT_TYPE type)
@@ -85,7 +110,6 @@ int VPUClientInit(VPU_CLIENT_TYPE type)
     }
     case VPU_DEC_HEVC: {
         name = name_hevc_service;
-        type = VPU_DEC;
         break;
     }
     case VPU_DEC_PP:
@@ -108,15 +132,19 @@ int VPUClientInit(VPU_CLIENT_TYPE type)
     }
     }
 
-    fd = open(name, O_RDWR);
+    fd = open_decoder_dev (name, type);
 
     mpp_env_get_u32("vpu_debug", &vpu_debug, 0);
 
     if (fd == -1) {
         mpp_err_f("failed to open %s, errno = %d, error msg: %s\n",
-                                name, errno, strerror(errno));
+                  name, errno, strerror(errno));
         return -1;
     }
+
+    if (type == VPU_DEC_HEVC)
+        type = VPU_DEC;
+
     ret = ioctl(fd, VPU_IOC_SET_CLIENT_TYPE, (RK_U32)type);
     if (ret) {
         mpp_err_f("ioctl VPU_IOC_SET_CLIENT_TYPE failed ret %d errno %d\n", ret, errno);
